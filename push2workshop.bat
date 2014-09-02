@@ -1,6 +1,6 @@
 @echo off
 
-set WSID=NULL_AND_VOID
+set WSID=309020990
 
 echo Please Confirm. Is everything ready?
 
