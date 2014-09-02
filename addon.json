@@ -1,0 +1,13 @@
+{
+	"title"		:	"Workshop Download Script",
+	"type"		:	"tool",
+	"tags"		:	[],
+	"ignore"	:
+	[
+		".git*",
+		"*.gma",
+		"*.md",
+		"*.bat",
+		"LICENSE"
+	]
+}
