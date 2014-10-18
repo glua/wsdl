@@ -47,6 +47,7 @@ concommand.Add("wsdl_buildmanifest",function()
 
 		print("Starting "..fname)
 		local fobj = file.Open(fname,"rb","MOD")
+		if !fobj then print(" - FAILURE! File does not exist! Did you try using a linked collection? It won't work!") failures=failures+1 continue end
 		if fobj:Read(4)!="GMAD" then print(" - FAILURE! File ident is wrong! Seriously, what the fuck!") fobj:Close() failures=failures+1 continue end
 		if fobj:ReadByte()!=3 then print(" - FAILURE! File version is wrong! This script needs updating!") fobj:Close() failures=failures+1 continue end
 		fobj:ReadDouble() //Steamid (actually long long, not implemented)
