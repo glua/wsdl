@@ -1,92 +1,73 @@
-local read_manifest = file.Read("wsdl_manifest.txt")
+concommand.Add("wsdl_buildmanifest",function()
+	print("The command is deprecated. WSDL no longer needs to build a manifest file. Everything should just work.")
+end,nil,nil,FCVAR_SERVER_CAN_EXECUTE)
 
-if read_manifest==nil then
-	print('[WSDL] No manifest. Run "wsdl_buildmanifest" to generate the manifest.')
-else
-	read_manifest=util.JSONToTable(read_manifest)
-	for k,v in pairs(read_manifest.general) do
-		resource.AddWorkshop(v)
-	end
-	print("[WSDL] Added "..#read_manifest.general.." workshop addons to download list.")
-	local mapaddon = read_manifest.maps[game.GetMap()]
-	if mapaddon then
-		print('[WSDL] Added workshop addon for map "'..game.GetMap()..'".')
-	else
-		print('[WSDL] No workshop addon found for map "'..game.GetMap()..'".')
-	end
-end
+local extension_types = {
+	//Models
+	mdl=true,vtx=true,
 
-/*
-	Format Info: https://github.com/garrynewman/gmad/blob/master/src/create_gmad.cpp
-*/
+	//Materials, Textures
+	vmt=false,vtf=false,
+	png=false,
 
-local function freadstring(f)
-	local str=""
-	while true do
-		local c= f:ReadByte()
-		if c==0 then return str end
-		str= str .. string.char(c)
-	end
-end
+	//Text
+	txt=false,
 
-local types_content = {
-	models=true,
-	sound=true
+	//Code
+	lua=false,
+
+	//AI
+	ain=false,nav=false,
+
+	//Wallpapers?
+	jpg=false,jpeg=false
 }
 
-concommand.Add("wsdl_buildmanifest",function()
-	print("Building WSDL manifest...")
-	local failures=0
-	local manifest={general={},maps={}}
+if !game.SinglePlayer() then
+	local dt = SysTime()
+
+	local function msg(str,...)
+		MsgN("[WSDL] ",string.format(str,...))
+	end
+
+	local function traverse(subPath,basePath)
+		local files,dirs = file.Find(subPath.."*",basePath)
+		for _,f in pairs(files) do
+			local ext = string.GetExtensionFromFilename(f)
+
+			if ext=="bsp" then
+				if string.StripExtension(f) == game.GetMap() then
+					return true
+				end
+			elseif extension_types[ext]!=nil then
+				if extension_types[ext] then
+					return true
+				end
+			else
+				msg("Unknown filetype: %s",f)
+			end
+		end
+		for _,d in pairs(dirs) do
+			if traverse(subPath..d.."/",basePath) then return true end
+		end
+	end
+
+	local addons = engine.GetAddons()
+
+	msg("Scanning %i addons...",#addons)
+
+	local download_count = 0
 
 	for k,addon in pairs(engine.GetAddons()) do
 		if !addon.downloaded or !addon.mounted then continue end
-
-		local fname = addon.file
-		local addon_id = addon.wsid
-
-		print("Starting "..fname)
-		local fobj = file.Open(fname,"rb","MOD")
-		if !fobj then print(" - FAILURE! File does not exist! Did you try using a linked collection? It won't work!") failures=failures+1 continue end
-		if fobj:Read(4)!="GMAD" then print(" - FAILURE! File ident is wrong! Seriously, what the fuck!") fobj:Close() failures=failures+1 continue end
-		if fobj:ReadByte()!=3 then print(" - FAILURE! File version is wrong! This script needs updating!") fobj:Close() failures=failures+1 continue end
-		fobj:ReadDouble() //Steamid (actually long long, not implemented)
-		fobj:ReadDouble() //Timestamp (actually long long)
-		fobj:ReadByte() //Spacer???
-		freadstring(fobj) //Title
-		freadstring(fobj) //Desc or addon.json
-		freadstring(fobj) //Author name (not implemented)
-		fobj:ReadLong() //Addon version (not implemented)
-		
-		local content_files=0
-		local added_maps=false
-		while true do
-			if fobj:ReadLong()==0 then break end //File number, equals zero at end of list
-			local filename = freadstring(fobj)
-			fobj:ReadDouble() //File size (actually long long)
-			fobj:ReadLong() //File CRC (not sure what that is, cant be too important)
-			local filetype = string.match(filename,"^[^/]*")
-			
-			if types_content[filetype] then
-				content_files = content_files+1
-			elseif filetype=="maps" then
-				local extension = string.match(filename,"%..*$")
-				if extension==".bsp" then
-					local mapname = string.sub(string.match(filename,"/.*%.bsp"),2,-5)
-					print(' - Added map "'..mapname..'" to map table.')
-					manifest.maps[mapname]=addon_id
-					added_maps=true
-				end
-			end
-		end
-		fobj:Close()
-
-		if content_files>0 and !added_maps then
-			print(" - Added to general download list. ("..content_files.." content files)")
-			table.insert(manifest.general,addon_id)
+		if traverse("",addon.title) then
+			resource.AddWorkshop(addon.wsid)
+			download_count=download_count+1
 		end
 	end
-	print("Done!\n - Failures: "..failures.."\n - General Content Addons: "..#manifest.general.."\n - Maps: "..table.Count(manifest.maps))
-	file.Write("wsdl_manifest.txt", util.TableToJSON(manifest))
-	print("Manifest saved. Changes will take effect on map change/restart.")
-end,nil,nil,FCVAR_SERVER_CAN_EXECUTE)
+
+	msg("Added %i addons to client download list.",download_count)
+
+	local t = SysTime()-dt
+	msg("Completed in %.4f seconds. (%.4fs per addon)",t,t/#addons)
+end
