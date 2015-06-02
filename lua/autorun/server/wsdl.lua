@@ -1,14 +1,16 @@
-concommand.Add("wsdl_buildmanifest",function()
-	print("The command is deprecated. WSDL no longer needs to build a manifest file. Everything should just work.")
-end,nil,nil,FCVAR_SERVER_CAN_EXECUTE)
-
 local extension_types = {
 	//Models
 	mdl=true,vtx=true,
 
+	//Sounds
+	wav=true,mp3=true,
+
 	//Materials, Textures
 	vmt=false,vtf=false,
 	png=false,
+
+	//Particles
+	pcf=false,
 
 	//Text
 	txt=false,
