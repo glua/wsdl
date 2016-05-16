@@ -1,4 +1,4 @@
-local extension_types = {
+local resource_extension_types = {
 	//Models
 	mdl=true,vtx=true,
 
@@ -6,23 +6,8 @@ local extension_types = {
 	wav=true,mp3=true,
 
 	//Materials, Textures
-	vmt=false,vtf=false,
-	png=false,
-
-	//Particles
-	pcf=false,
-
-	//Text
-	txt=false,
-
-	//Code
-	lua=false,
-
-	//AI
-	ain=false,nav=false,
-
-	//Wallpapers?
-	jpg=false,jpeg=false
+	vmt=true,vtf=true,
+	png=true,
 }
 
 if !game.SinglePlayer() then
@@ -32,25 +17,20 @@ if !game.SinglePlayer() then
 		MsgN("[WSDL] ",string.format(str,...))
 	end
 
-	local function traverse(subPath,basePath)
+	local function traverse(subPath,basePath,found_exts)
 		local files,dirs = file.Find(subPath.."*",basePath)
 		for _,f in pairs(files) do
 			local ext = string.GetExtensionFromFilename(f)
+			found_exts[ext] = true
 
 			if ext=="bsp" then
 				if string.StripExtension(f) == game.GetMap() then
 					return true
 				end
-			elseif extension_types[ext]!=nil then
-				if extension_types[ext] then
-					return true
-				end
-			else
-				msg("Unknown filetype: %s",f)
 			end
 		end
 		for _,d in pairs(dirs) do
-			if traverse(subPath..d.."/",basePath) then return true end
+			if traverse(subPath..d.."/",basePath, found_exts) then return true end
 		end
 	end
 
@@ -62,7 +42,21 @@ if !game.SinglePlayer() then
 
 	for k,addon in pairs(engine.GetAddons()) do
 		if !addon.downloaded or !addon.mounted then continue end
-		if traverse("",addon.title) then
+		
+		local found_exts = {}
+		local should_add = traverse("", addon.title, found_exts)
+		
+		-- if addon fails initial test but does not contain a map, check for resource files
+		if not should_add and not found_exts.bsp then
+			for res_ext,_ in pairs(resource_extension_types) do
+				if found_exts[res_ext] then
+					should_add = true
+					break
+				end
+			end
+		end
+		
+		if should_add then
 			resource.AddWorkshop(addon.wsid)
 			download_count=download_count+1
 		end
