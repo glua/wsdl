@@ -3,7 +3,7 @@ local resource_extension_types = {
 	mdl=true,vtx=true,
 
 	//Sounds
-	wav=true,mp3=true,
+	wav=true,mp3=true,ogg=true,
 
 	//Materials, Textures
 	vmt=true,vtf=true,
@@ -22,15 +22,9 @@ if !game.SinglePlayer() then
 		for _,f in pairs(files) do
 			local ext = string.GetExtensionFromFilename(f)
 			found_exts[ext] = true
-
-			if ext=="bsp" then
-				if string.StripExtension(f) == game.GetMap() then
-					return true
-				end
-			end
 		end
 		for _,d in pairs(dirs) do
-			if traverse(subPath..d.."/",basePath, found_exts) then return true end
+			traverse(subPath..d.."/",basePath, found_exts)
 		end
 	end
 
@@ -44,10 +38,11 @@ if !game.SinglePlayer() then
 		if !addon.downloaded or !addon.mounted then continue end
 		
 		local found_exts = {}
-		local should_add = traverse("", addon.title, found_exts)
+		local should_add = false
+		traverse("", addon.title, found_exts)
 		
 		-- if addon fails initial test but does not contain a map, check for resource files
-		if not should_add and not found_exts.bsp then
+		if not found_exts.bsp then
 			for res_ext,_ in pairs(resource_extension_types) do
 				if found_exts[res_ext] then
 					should_add = true
