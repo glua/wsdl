@@ -1,24 +1,24 @@
-local resource_extension_types = {
-	--Models
-	mdl=true,
-	vtx=true,
-
-	--Sounds
-	wav=true,
-	mp3=true,
-	ogg=true,
-	aac=true,
-
-	--Materials, Textures
-	vmt=true,
-	vtf=true,
-	png=true,
-
-	--fonts
-	ttf=true
-}
-
 if !game.SinglePlayer() then
+	local resource_extension_types = {
+		--Models
+		mdl=true,
+		vtx=true,
+	
+		--Sounds
+		wav=true,
+		mp3=true,
+		ogg=true,
+		aac=true,
+	
+		--Materials, Textures
+		vmt=true,
+		vtf=true,
+		png=true,
+	
+		--fonts
+		ttf=true
+	}
+
 	local dt = SysTime()
 
 	local function msg(str,...)
@@ -37,10 +37,33 @@ if !game.SinglePlayer() then
 	end
 
 	local addons = engine.GetAddons()
+	local download_count = 0
+	local csum = util.CRC(table.ToString(engine.GetAddons()))
+
+	msg("Addon list checksum is %i",csum)
+
+	local filecache
+	if file.Exists("wsdl_cache.txt", "DATA") then
+		filecache = util.JSONToTable(file.Read("wsdl_cache.txt","DATA"))
+		if filecache.csum == csum then
+			download_count = #filecache.sendaddons
+			for _,id in pairs(filecache.sendaddons) do
+				resource.AddWorkshop(id)
+			end
+			msg("Added %i addons to client download list.",download_count)
+			msg("Completed in %.4f seconds.",SysTime()-dt)
+			return
+		else
+			filecache.csum = csum
+			filecache.sendaddons = {}
+		end
+	else
+		filecache = {}
+		filecache.csum = csum
+		filecache.sendaddons = {}
+	end
 
 	msg("Scanning %i addons...",#addons)
-
-	local download_count = 0
 
 	for k,addon in pairs(addons) do
 		if !addon.downloaded or !addon.mounted then continue end
@@ -62,6 +85,7 @@ if !game.SinglePlayer() then
 		if should_add then
 			resource.AddWorkshop(addon.wsid)
 			download_count=download_count+1
+			table.insert(filecache.sendaddons, addon.wsid)
 		end
 	end
 
@@ -69,4 +93,7 @@ if !game.SinglePlayer() then
 
 	local t = SysTime()-dt
 	msg("Completed in %.4f seconds. (%.4fs per addon)",t,t/#addons)
+
+	file.Write("wsdl_cache.txt", util.TableToJSON(filecache))
+	msg("Updated cache file because the server's addon list has changed.")
 end
