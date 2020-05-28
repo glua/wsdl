@@ -7,11 +7,15 @@ local resource_extension_types = {
 	wav=true,
 	mp3=true,
 	ogg=true,
+	aac=true,
 
 	--Materials, Textures
 	vmt=true,
 	vtf=true,
-	png=true
+	png=true,
+
+	--fonts
+	ttf=true
 }
 
 if !game.SinglePlayer() then
@@ -38,7 +42,7 @@ if !game.SinglePlayer() then
 
 	local download_count = 0
 
-	for k,addon in pairs(engine.GetAddons()) do
+	for k,addon in pairs(addons) do
 		if !addon.downloaded or !addon.mounted then continue end
 		
 		local found_exts = {}
