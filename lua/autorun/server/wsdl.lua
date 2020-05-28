@@ -1,13 +1,17 @@
 local resource_extension_types = {
-	//Models
-	mdl=true,vtx=true,
+	--Models
+	mdl=true,
+	vtx=true,
 
-	//Sounds
-	wav=true,mp3=true,ogg=true,
+	--Sounds
+	wav=true,
+	mp3=true,
+	ogg=true,
 
-	//Materials, Textures
-	vmt=true,vtf=true,
-	png=true,
+	--Materials, Textures
+	vmt=true,
+	vtf=true,
+	png=true
 }
 
 if !game.SinglePlayer() then
