@@ -73,7 +73,7 @@ if !game.SinglePlayer() then
 		
 		local found_exts = {}
 		local should_add = false
-		traverse("WORKSHOP", addon.title, found_exts)
+		traverse("", addon.title, found_exts)
 		
 		-- if addon fails initial test but does not contain a map, check for resource files
 		if not found_exts.bsp then
