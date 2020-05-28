@@ -41,7 +41,7 @@ if !game.SinglePlayer() then
 		addons[k].timeadded=nil
 	end
 	local download_count = 0
-	local csum = util.CRC(table.ToString(engine.GetAddons()))
+	local csum = util.CRC(table.ToString(addons))
 
 	msg("Addon list checksum is %i",csum)
 
