@@ -37,6 +37,9 @@ if !game.SinglePlayer() then
 	end
 
 	local addons = engine.GetAddons()
+	for k,_ in pairs( addons ) do
+		addons[k].timeadded=nil
+	end
 	local download_count = 0
 	local csum = util.CRC(table.ToString(engine.GetAddons()))
 
@@ -70,7 +73,7 @@ if !game.SinglePlayer() then
 		
 		local found_exts = {}
 		local should_add = false
-		traverse("", addon.title, found_exts)
+		traverse("WORKSHOP", addon.title, found_exts)
 		
 		-- if addon fails initial test but does not contain a map, check for resource files
 		if not found_exts.bsp then
