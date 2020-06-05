@@ -1,8 +1,8 @@
 if !game.SinglePlayer() then
 	local resource_extension_types = {
 		--Models
-		mdl=true,
-		vtx=true,
+		--mdl=true,
+		--vtx=true,
 	
 		--Sounds
 		wav=true,
@@ -16,7 +16,10 @@ if !game.SinglePlayer() then
 		png=true,
 	
 		--fonts
-		ttf=true
+		ttf=true,
+
+		--animations
+		ani=true
 	}
 
 	local dt = SysTime()
@@ -53,7 +56,7 @@ if !game.SinglePlayer() then
 			for _,id in pairs(filecache.sendaddons) do
 				resource.AddWorkshop(id)
 			end
-			msg("Added %i addons to client download list.",download_count)
+			msg("Added %i addons to client download list from cache.",download_count)
 			msg("Completed in %.4f seconds.",SysTime()-dt)
 			return
 		else
@@ -73,14 +76,19 @@ if !game.SinglePlayer() then
 		
 		local found_exts = {}
 		local should_add = false
-		traverse("", addon.title, found_exts)
+
+		if addon.models > 0 then should_add = true end
 		
-		-- if addon fails initial test but does not contain a map, check for resource files
-		if not found_exts.bsp then
-			for res_ext,_ in pairs(resource_extension_types) do
-				if found_exts[res_ext] then
-					should_add = true
-					break
+		if not should_add then
+			traverse("", addon.title, found_exts)
+			
+			-- if addon fails initial test but does not contain a map, check for resource files
+			if not found_exts.bsp then
+				for res_ext,_ in pairs(resource_extension_types) do
+					if found_exts[res_ext] then
+						should_add = true
+						break
+					end
 				end
 			end
 		end
