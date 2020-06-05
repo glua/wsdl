@@ -77,13 +77,13 @@ if !game.SinglePlayer() then
 		local found_exts = {}
 		local should_add = false
 
-		if addon.models > 0 then should_add = true end
-		
-		if not should_add then
-			traverse("", addon.title, found_exts)
+		traverse("", addon.title, found_exts)
 			
-			-- if addon fails initial test but does not contain a map, check for resource files
-			if not found_exts.bsp then
+		-- if addon fails initial test but does not contain a map, check for resource files
+		if not found_exts.bsp then
+			if addon.models > 0 then
+				should_add = true
+			else
 				for res_ext,_ in pairs(resource_extension_types) do
 					if found_exts[res_ext] then
 						should_add = true
