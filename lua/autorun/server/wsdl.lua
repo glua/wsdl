@@ -1,25 +1,24 @@
 if !game.SinglePlayer() then
 	local resource_extension_types = {
-		--Models
-		--mdl=true,
-		--vtx=true,
+		--Models (handled by addon.models)
 	
 		--Sounds
-		wav=true,
-		mp3=true,
-		ogg=true,
-		aac=true,
+		"wav",
+		"mp3",
+		"ogg",
+		"aac",
 	
 		--Materials, Textures
-		vmt=true,
-		vtf=true,
-		png=true,
+		"vmt",
+		"vtf",
+		"png",
+		"jpg",
 	
 		--fonts
-		ttf=true,
+		"ttf",
 
 		--animations
-		ani=true
+		"ani"
 	}
 
 	local dt = SysTime()
@@ -30,17 +29,17 @@ if !game.SinglePlayer() then
 
 	local function traverse(subPath,basePath,found_exts)
 		local files,dirs = file.Find(subPath.."*",basePath)
-		for _,f in pairs(files) do
+		for _,f in ipairs(files) do
 			local ext = string.GetExtensionFromFilename(f)
 			found_exts[ext] = true
 		end
-		for _,d in pairs(dirs) do
+		for _,d in ipairs(dirs) do
 			traverse(subPath..d.."/",basePath, found_exts)
 		end
 	end
 
 	local addons = engine.GetAddons()
-	for k,_ in pairs( addons ) do
+	for k,_ in ipairs( addons ) do
 		addons[k].timeadded=nil
 	end
 	local download_count = 0
@@ -53,7 +52,7 @@ if !game.SinglePlayer() then
 		filecache = util.JSONToTable(file.Read("wsdl_cache.txt","DATA"))
 		if filecache.csum == csum then
 			download_count = #filecache.sendaddons
-			for _,id in pairs(filecache.sendaddons) do
+			for _,id in ipairs(filecache.sendaddons) do
 				resource.AddWorkshop(id)
 			end
 			msg("Added %i addons to client download list from cache.",download_count)
@@ -71,7 +70,7 @@ if !game.SinglePlayer() then
 
 	msg("Scanning %i addons...",#addons)
 
-	for k,addon in pairs(addons) do
+	for _,addon in ipairs(addons) do
 		if !addon.downloaded or !addon.mounted then continue end
 		
 		local found_exts = {}
@@ -84,7 +83,7 @@ if !game.SinglePlayer() then
 			if addon.models > 0 then
 				should_add = true
 			else
-				for res_ext,_ in pairs(resource_extension_types) do
+				for _,res_ext in ipairs(resource_extension_types) do
 					if found_exts[res_ext] then
 						should_add = true
 						break
