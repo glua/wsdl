@@ -35,14 +35,14 @@ if !game.SinglePlayer() then
 				found_exts[ext] = true
 			end
 		else
-			msg("Error! no files in %s  Addon is likely corrupted or uses a game unsupported special character in a folder/file name.",basePath)
+			msg("Error! could not read files in subfolder %s of addon %s   Addon is corrupted or uses a game unsupported special character in a folder/file name.",subPath,basePath)
 		end
 		if dirs then
 			for _,d in ipairs(dirs) do
 				traverse(subPath..d.."/",basePath, found_exts)
 			end
 		else
-			msg("Error! no directories in %s  Addon is likely corrupted or uses a game unsupported special character in a folder/file name.",basePath)
+			msg("Error! could not read directories in subfolder %s of addon %s   Addon is corrupted or uses a game unsupported special character in a folder/file name.",subPath,basePath)
 		end
 	end
 
