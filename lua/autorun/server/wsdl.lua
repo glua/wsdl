@@ -29,12 +29,20 @@ if !game.SinglePlayer() then
 
 	local function traverse(subPath,basePath,found_exts)
 		local files,dirs = file.Find(subPath.."*",basePath)
-		for _,f in ipairs(files) do
-			local ext = string.GetExtensionFromFilename(f)
-			found_exts[ext] = true
+		if files then
+			for _,f in ipairs(files) do
+				local ext = string.GetExtensionFromFilename(f)
+				found_exts[ext] = true
+			end
+		else
+			msg("Error! no files in %s",basePath)
 		end
-		for _,d in ipairs(dirs) do
-			traverse(subPath..d.."/",basePath, found_exts)
+		if dirs then
+			for _,d in ipairs(dirs) do
+				traverse(subPath..d.."/",basePath, found_exts)
+			end
+		else
+			msg("Error! no directories in %s",basePath)
 		end
 	end
 
