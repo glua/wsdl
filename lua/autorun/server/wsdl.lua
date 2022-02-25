@@ -54,7 +54,7 @@ if !game.SinglePlayer() then
 		addons[k].timeadded=nil
 	end
 	local csum = util.SHA256(table.ToString(resource_extension_types) .. table.ToString(addons))
-	msg("Addon list checksum is %i",csum)
+	msg("Addon list checksum is %s",csum)
 
 	local download_count = 0
 	local filecache
@@ -83,8 +83,10 @@ if !game.SinglePlayer() then
 	for _,addon in ipairs(addons) do
 		if !addon.downloaded or !addon.mounted then continue end
 		
-		local found_exts = {}
 		local should_add = false
+		local found_exts = {}
+
+		--Gamemode
 
 		traverse("", addon.title, found_exts)
 			
