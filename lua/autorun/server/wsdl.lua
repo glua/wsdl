@@ -18,10 +18,11 @@ if !game.SinglePlayer() then
 		"ttf",
 
 		--animations
-		"ani"
-	}
+		"ani",
 
-	local dt = SysTime()
+		--particles
+		"pcf"
+	}
 
 	local function msg(str,...)
 		MsgN("[WSDL] ",string.format(str,...))
@@ -46,15 +47,16 @@ if !game.SinglePlayer() then
 		end
 	end
 
+	local dt = SysTime()
+
 	local addons = engine.GetAddons()
 	for k,_ in ipairs( addons ) do
 		addons[k].timeadded=nil
 	end
-	local download_count = 0
-	local csum = util.CRC(table.ToString(addons))
-
+	local csum = util.SHA256(table.ToString(resource_extension_types) .. table.ToString(addons))
 	msg("Addon list checksum is %i",csum)
 
+	local download_count = 0
 	local filecache
 	if file.Exists("wsdl_cache.txt", "DATA") then
 		filecache = util.JSONToTable(file.Read("wsdl_cache.txt","DATA"))
