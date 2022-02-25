@@ -86,8 +86,6 @@ if !game.SinglePlayer() then
 		local should_add = false
 		local found_exts = {}
 
-		--Gamemode
-
 		traverse("", addon.title, found_exts)
 			
 		-- if addon fails initial test but does not contain a map, check for resource files
