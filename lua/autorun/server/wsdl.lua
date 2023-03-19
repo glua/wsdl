@@ -60,7 +60,8 @@ if !game.SinglePlayer() then
 	local filecache
 	if file.Exists("wsdl_cache.txt", "DATA") then
 		filecache = util.JSONToTable(file.Read("wsdl_cache.txt","DATA"))
-		if filecache.csum == csum then
+		if filecache == nil then filecache = {} end
+		if filecache.csum and filecache.csum == csum then
 			download_count = #filecache.sendaddons
 			for _,id in ipairs(filecache.sendaddons) do
 				resource.AddWorkshop(id)
